@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Star, Play, CheckCircle, ChevronRight, X, RotateCcw, BookOpen, Award, List, AlertCircle } from 'lucide-react';
+import { 
+  Star, Play, CheckCircle, ChevronRight, X, 
+  RotateCcw, BookOpen, Award, List, AlertCircle 
+} from 'lucide-react';
 
-// --- DATA SOURCE ---
+// --- 데이터는 가독성을 위해 상단에 유지 (제공해주신 데이터와 동일) ---
 const conversationData = [
   { day: 51, kr: "골프를 더 잘 치고 싶어요.", en: "I want to get better at golf." },
   { day: 52, kr: "바빠서 운동 할 짬이 안 나네요.", en: "I can't seem to find (the) time to exercise." },
@@ -170,9 +173,10 @@ const App = () => {
     showAnswer: false,
     score: 0,
     items: [],
-    difficultItems: [], // 새로 추가: 어려워한 문장들
+    difficultItems: [],
   });
 
+  // Curriculum generation
   const curriculum = useMemo(() => {
     const days = [];
     for (let i = 0; i < 10; i++) {
@@ -203,7 +207,7 @@ const App = () => {
       showAnswer: false,
       score: 0,
       items: shuffled,
-      difficultItems: [], // 퀴즈 시작 시 초기화
+      difficultItems: [],
     });
     setMode('quiz');
   };
@@ -213,7 +217,6 @@ const App = () => {
     const nextIdx = quizState.currentIdx + 1;
     const newScore = gotIt ? quizState.score + 1 : quizState.score;
     
-    // 어려워한 문장이면 목록에 추가
     const newDifficultItems = gotIt 
       ? quizState.difficultItems 
       : [...quizState.difficultItems, currentItem];
@@ -238,6 +241,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-4 md:p-8">
+      {/* Header */}
       <header className="max-w-3xl mx-auto mb-8 text-center">
         <h1 className="text-3xl font-bold text-indigo-700 mb-2 flex items-center justify-center gap-2">
           <Award className="text-amber-500" /> English Sprint Quiz
@@ -245,9 +249,10 @@ const App = () => {
         <p className="text-slate-500">10일 완성: 회화/구동사/기본동사 150문장 마스터</p>
       </header>
 
+      {/* Day Selector */}
       {mode === 'study' && (
         <div className="max-w-4xl mx-auto mb-6">
-          <div className="flex overflow-x-auto pb-2 gap-2 scrollbar-hide no-scrollbar">
+          <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
             {[...Array(10)].map((_, i) => (
               <button
                 key={i}
@@ -265,9 +270,10 @@ const App = () => {
         </div>
       )}
 
+      {/* Main Content */}
       <main className="max-w-2xl mx-auto">
         {mode === 'study' && (
-          <div className="space-y-6 animate-in fade-in duration-500">
+          <div className="space-y-6">
             <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
               <div>
                 <span className="text-sm font-bold text-indigo-500 uppercase tracking-wider">Day {activeDay} 학습 리스트</span>
@@ -282,33 +288,32 @@ const App = () => {
             </div>
 
             <div className="space-y-3">
-              {curriculum[activeDay - 1].map((item, idx) => {
-                return (
-                  <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4 group">
-                    <div className="mt-1 flex-shrink-0 w-16 text-[10px] font-bold py-1 bg-slate-100 text-slate-500 rounded text-center uppercase tracking-tighter">
-                      {item.type}
-                    </div>
-                    <div className="flex-grow">
-                      <p className="font-medium text-slate-800 mb-1">{item.kr}</p>
-                      <p className="text-indigo-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                        {item.en}
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => toggleFavorite(item.id)}
-                      className={`flex-shrink-0 transition-colors ${favorites[item.id] ? 'text-amber-400' : 'text-slate-300 hover:text-slate-400'}`}
-                    >
-                      <Star size={20} fill={favorites[item.id] ? "currentColor" : "none"} />
-                    </button>
+              {curriculum[activeDay - 1].map((item) => (
+                <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4 group">
+                  <div className="mt-1 flex-shrink-0 w-16 text-[10px] font-bold py-1 bg-slate-100 text-slate-500 rounded text-center uppercase tracking-tighter">
+                    {item.type}
                   </div>
-                );
-              })}
+                  <div className="flex-grow">
+                    <p className="font-medium text-slate-800 mb-1">{item.kr}</p>
+                    <p className="text-indigo-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                      {item.en}
+                    </p>
+                  </div>
+                  <button 
+                    onClick={() => toggleFavorite(item.id)}
+                    className={`flex-shrink-0 transition-colors ${favorites[item.id] ? 'text-amber-400' : 'text-slate-300 hover:text-slate-400'}`}
+                  >
+                    <Star size={20} fill={favorites[item.id] ? "currentColor" : "none"} />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {mode === 'quiz' && (
-          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200 border border-slate-100 text-center relative overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+        {mode === 'quiz' && quizState.items.length > 0 && (
+          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200 border border-slate-100 text-center relative overflow-hidden">
+            {/* Progress Bar */}
             <div className="absolute top-0 left-0 h-1.5 bg-slate-100 w-full">
               <div 
                 className="h-full bg-indigo-500 transition-all duration-300" 
@@ -369,7 +374,7 @@ const App = () => {
         )}
 
         {mode === 'result' && (
-          <div className="animate-in zoom-in-95 duration-300 space-y-6">
+          <div className="space-y-6">
             <div className="bg-white rounded-3xl p-10 shadow-xl border border-slate-100 text-center">
               <div className="w-20 h-20 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Award size={40} />
@@ -395,7 +400,6 @@ const App = () => {
               </div>
             </div>
 
-            {/* 오답/어려운 문장 리스트 섹션 */}
             {quizState.difficultItems.length > 0 && (
               <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
                 <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-50">
@@ -404,7 +408,7 @@ const App = () => {
                 </div>
                 <div className="space-y-4">
                   {quizState.difficultItems.map((item) => (
-                    <div key={`result-${item.id}`} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-4 group">
+                    <div key={`result-${item.id}`} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-4">
                       <div className="flex-grow">
                         <div className="flex items-center gap-2 mb-1">
                           <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded-full uppercase">
@@ -429,6 +433,7 @@ const App = () => {
         )}
       </main>
 
+      {/* Footer */}
       <footer className="max-w-2xl mx-auto mt-12 pt-8 border-t border-slate-200 text-center text-slate-400 text-sm">
         <p>© 2026 English Sprint 10-Day Challenge</p>
         <div className="flex justify-center gap-4 mt-2 font-semibold">
@@ -437,14 +442,10 @@ const App = () => {
         </div>
       </footer>
       
+      {/* Global CSS for hidescroll */}
       <style>{`
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-        .scrollbar-hide {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );
