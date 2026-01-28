@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
+// 아이콘 불러오기 (설치 안 되어 있으면 여기서 에러 납니다)
 import { 
-  Star, Play, CheckCircle, ChevronRight, X, 
-  RotateCcw, BookOpen, Award, List, AlertCircle 
+  Star, Play, X, RotateCcw, BookOpen, Award, List, AlertCircle 
 } from 'lucide-react';
 
-// --- 데이터는 가독성을 위해 상단에 유지 (제공해주신 데이터와 동일) ---
+// --- 데이터 (생략 없이 원본 데이터 유지) ---
 const conversationData = [
   { day: 51, kr: "골프를 더 잘 치고 싶어요.", en: "I want to get better at golf." },
   { day: 52, kr: "바빠서 운동 할 짬이 안 나네요.", en: "I can't seem to find (the) time to exercise." },
@@ -164,7 +164,7 @@ const basicVerbData = [
   { day: 100, kr: "영화 줄거리 말하지 말아요! 아직 안 봤단 말이에요.", en: "Don’t spoil the movie! I haven’t seen it yet." },
 ];
 
-const App = () => {
+function App() {
   const [activeDay, setActiveDay] = useState(1);
   const [mode, setMode] = useState('study'); // 'study' | 'quiz' | 'result'
   const [favorites, setFavorites] = useState({});
@@ -176,13 +176,12 @@ const App = () => {
     difficultItems: [],
   });
 
-  // Curriculum generation
+  // 데이터 가공 로직
   const curriculum = useMemo(() => {
     const days = [];
     for (let i = 0; i < 10; i++) {
       const startIndex = i * 5;
       const endIndex = startIndex + 5;
-      
       const dayData = [
         ...conversationData.slice(startIndex, endIndex).map((item, idx) => ({ ...item, type: '회화', id: `conv-${item.day}-${idx}` })),
         ...phrasalData.slice(startIndex, endIndex).map((item, idx) => ({ ...item, type: '구동사', id: `phra-${item.day}-${idx}` })),
@@ -194,10 +193,7 @@ const App = () => {
   }, []);
 
   const toggleFavorite = (id) => {
-    setFavorites(prev => ({
-      ...prev,
-      [id]: !prev[id]
-    }));
+    setFavorites(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const startQuiz = () => {
@@ -216,10 +212,7 @@ const App = () => {
     const currentItem = quizState.items[quizState.currentIdx];
     const nextIdx = quizState.currentIdx + 1;
     const newScore = gotIt ? quizState.score + 1 : quizState.score;
-    
-    const newDifficultItems = gotIt 
-      ? quizState.difficultItems 
-      : [...quizState.difficultItems, currentItem];
+    const newDifficultItems = gotIt ? quizState.difficultItems : [...quizState.difficultItems, currentItem];
 
     if (nextIdx < quizState.items.length) {
       setQuizState(prev => ({
@@ -230,80 +223,57 @@ const App = () => {
         difficultItems: newDifficultItems
       }));
     } else {
-      setQuizState(prev => ({ 
-        ...prev, 
-        score: newScore,
-        difficultItems: newDifficultItems 
-      }));
+      setQuizState(prev => ({ ...prev, score: newScore, difficultItems: newDifficultItems }));
       setMode('result');
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans p-4 md:p-8">
-      {/* Header */}
-      <header className="max-w-3xl mx-auto mb-8 text-center">
-        <h1 className="text-3xl font-bold text-indigo-700 mb-2 flex items-center justify-center gap-2">
-          <Award className="text-amber-500" /> English Sprint Quiz
+    <div className="min-h-screen bg-gray-50 p-4 font-sans text-gray-900">
+      <header className="mx-auto max-w-2xl mb-8 text-center">
+        <h1 className="text-3xl font-bold text-indigo-600 flex items-center justify-center gap-2">
+          <Award className="text-yellow-500" /> English Sprint
         </h1>
-        <p className="text-slate-500">10일 완성: 회화/구동사/기본동사 150문장 마스터</p>
+        <p className="text-gray-500 mt-2">10일 완성 영단어 마스터</p>
       </header>
 
-      {/* Day Selector */}
-      {mode === 'study' && (
-        <div className="max-w-4xl mx-auto mb-6">
-          <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
-            {[...Array(10)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveDay(i + 1)}
-                className={`flex-shrink-0 px-5 py-2 rounded-full font-semibold transition-all shadow-sm ${
-                  activeDay === i + 1 
-                    ? 'bg-indigo-600 text-white shadow-indigo-200' 
-                    : 'bg-white text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                Day {String(i + 1).padStart(2, '0')}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Main Content */}
-      <main className="max-w-2xl mx-auto">
+      <main className="mx-auto max-w-2xl">
         {mode === 'study' && (
           <div className="space-y-6">
-            <div className="flex justify-between items-center bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+            <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
+              {[...Array(10)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveDay(i + 1)}
+                  className={`flex-shrink-0 px-4 py-2 rounded-full font-bold transition-colors ${
+                    activeDay === i + 1 ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600'
+                  }`}
+                >
+                  Day {i + 1}
+                </button>
+              ))}
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm border flex justify-between items-center">
               <div>
-                <span className="text-sm font-bold text-indigo-500 uppercase tracking-wider">Day {activeDay} 학습 리스트</span>
-                <h2 className="text-xl font-bold">오늘의 15문장</h2>
+                <p className="text-sm text-indigo-500 font-bold uppercase">Today's Goal</p>
+                <h2 className="text-xl font-bold">Day {activeDay} 학습 리스트</h2>
               </div>
-              <button 
-                onClick={startQuiz}
-                className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-indigo-700 transition-transform active:scale-95 shadow-lg shadow-indigo-100"
-              >
-                <Play size={18} fill="currentColor" /> 퀴즈 시작
+              <button onClick={startQuiz} className="bg-indigo-600 text-white px-5 py-3 rounded-xl font-bold flex items-center gap-2">
+                <Play size={18} fill="white" /> 퀴즈
               </button>
             </div>
 
             <div className="space-y-3">
               {curriculum[activeDay - 1].map((item) => (
-                <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-start gap-4 group">
-                  <div className="mt-1 flex-shrink-0 w-16 text-[10px] font-bold py-1 bg-slate-100 text-slate-500 rounded text-center uppercase tracking-tighter">
-                    {item.type}
-                  </div>
+                <div key={item.id} className="bg-white p-4 rounded-xl border flex items-center gap-4 group hover:border-indigo-200 transition-colors">
+                  <div className="w-16 text-[10px] bg-gray-100 text-gray-500 py-1 rounded text-center font-bold">{item.type}</div>
                   <div className="flex-grow">
-                    <p className="font-medium text-slate-800 mb-1">{item.kr}</p>
-                    <p className="text-indigo-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                      {item.en}
-                    </p>
+                    <p className="font-medium text-gray-800">{item.kr}</p>
+                    <p className="text-indigo-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">{item.en}</p>
                   </div>
-                  <button 
-                    onClick={() => toggleFavorite(item.id)}
-                    className={`flex-shrink-0 transition-colors ${favorites[item.id] ? 'text-amber-400' : 'text-slate-300 hover:text-slate-400'}`}
-                  >
-                    <Star size={20} fill={favorites[item.id] ? "currentColor" : "none"} />
+                  <button onClick={() => toggleFavorite(item.id)} className={favorites[item.id] ? 'text-yellow-400' : 'text-gray-200'}>
+                    <Star size={20} fill={favorites[item.id] ? 'currentColor' : 'none'} />
                   </button>
                 </div>
               ))}
@@ -311,62 +281,28 @@ const App = () => {
           </div>
         )}
 
-        {mode === 'quiz' && quizState.items.length > 0 && (
-          <div className="bg-white rounded-3xl p-8 shadow-xl shadow-slate-200 border border-slate-100 text-center relative overflow-hidden">
-            {/* Progress Bar */}
-            <div className="absolute top-0 left-0 h-1.5 bg-slate-100 w-full">
-              <div 
-                className="h-full bg-indigo-500 transition-all duration-300" 
-                style={{ width: `${((quizState.currentIdx + 1) / quizState.items.length) * 100}%` }}
-              />
-            </div>
-
+        {mode === 'quiz' && (
+          <div className="bg-white rounded-3xl p-8 shadow-xl border text-center relative overflow-hidden">
             <div className="flex justify-between items-center mb-10">
-              <span className="text-sm font-bold text-slate-400">
-                QUIZ {quizState.currentIdx + 1} / {quizState.items.length}
-              </span>
-              <button onClick={() => setMode('study')} className="text-slate-400 hover:text-slate-600">
-                <X size={24} />
-              </button>
+              <span className="text-sm font-bold text-gray-400">{quizState.currentIdx + 1} / 15</span>
+              <button onClick={() => setMode('study')}><X size={24} /></button>
             </div>
-
-            <div className="min-h-[160px] flex flex-col justify-center items-center px-4">
-              <div className="inline-block px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full mb-4">
-                {quizState.items[quizState.currentIdx].type}
-              </div>
-              <h3 className="text-2xl font-bold text-slate-800 leading-tight">
-                {quizState.items[quizState.currentIdx].kr}
-              </h3>
-              
-              <div className={`mt-8 transition-all duration-300 ${quizState.showAnswer ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-                <p className="text-xl font-bold text-indigo-600 bg-indigo-50 p-6 rounded-2xl border border-indigo-100 shadow-inner">
-                  {quizState.items[quizState.currentIdx].en}
-                </p>
-              </div>
+            <div className="min-h-[200px] flex flex-col justify-center">
+              <span className="inline-block mx-auto px-3 py-1 bg-indigo-50 text-indigo-600 text-xs font-bold rounded-full mb-4">{quizState.items[quizState.currentIdx].type}</span>
+              <h3 className="text-2xl font-bold">{quizState.items[quizState.currentIdx].kr}</h3>
+              {quizState.showAnswer && (
+                <div className="mt-8 p-6 bg-indigo-50 rounded-2xl border border-indigo-100">
+                  <p className="text-xl font-bold text-indigo-600">{quizState.items[quizState.currentIdx].en}</p>
+                </div>
+              )}
             </div>
-
-            <div className="mt-12 flex flex-col gap-3">
+            <div className="mt-12">
               {!quizState.showAnswer ? (
-                <button 
-                  onClick={() => setQuizState(prev => ({ ...prev, showAnswer: true }))}
-                  className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold hover:bg-slate-800 transition-all shadow-lg"
-                >
-                  정답 확인하기
-                </button>
+                <button onClick={() => setQuizState(s => ({ ...s, showAnswer: true }))} className="w-full bg-gray-900 text-white py-4 rounded-2xl font-bold">정답 확인</button>
               ) : (
                 <div className="grid grid-cols-2 gap-4">
-                  <button 
-                    onClick={() => handleQuizAction(false)}
-                    className="bg-slate-100 text-slate-600 py-4 rounded-2xl font-bold hover:bg-slate-200"
-                  >
-                    더 공부해야해요
-                  </button>
-                  <button 
-                    onClick={() => handleQuizAction(true)}
-                    className="bg-green-500 text-white py-4 rounded-2xl font-bold hover:bg-green-600 shadow-lg shadow-green-100"
-                  >
-                    외웠어요!
-                  </button>
+                  <button onClick={() => handleQuizAction(false)} className="bg-gray-100 py-4 rounded-2xl font-bold text-gray-600">모르겠어요</button>
+                  <button onClick={() => handleQuizAction(true)} className="bg-green-500 py-4 rounded-2xl font-bold text-white">외웠어요!</button>
                 </div>
               )}
             </div>
@@ -374,81 +310,32 @@ const App = () => {
         )}
 
         {mode === 'result' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-3xl p-10 shadow-xl border border-slate-100 text-center">
-              <div className="w-20 h-20 bg-amber-100 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Award size={40} />
-              </div>
-              <h2 className="text-3xl font-bold mb-2">학습 완료!</h2>
-              <p className="text-slate-500 mb-8 font-medium">
-                Day {activeDay}의 15문장 중 <span className="text-indigo-600 font-bold">{quizState.score}</span>문장을 마스터했습니다.
-              </p>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <button 
-                  onClick={startQuiz}
-                  className="flex items-center justify-center gap-2 bg-slate-100 text-slate-700 py-4 rounded-2xl font-bold hover:bg-slate-200"
-                >
-                  <RotateCcw size={18} /> 다시 풀기
-                </button>
-                <button 
-                  onClick={() => setMode('study')}
-                  className="flex items-center justify-center gap-2 bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 shadow-lg"
-                >
-                  <List size={18} /> 목록으로
-                </button>
-              </div>
+          <div className="bg-white rounded-3xl p-10 shadow-xl border text-center">
+            <Award size={48} className="mx-auto text-yellow-500 mb-4" />
+            <h2 className="text-2xl font-bold">학습 완료!</h2>
+            <p className="text-gray-500 my-4">15문장 중 <span className="text-indigo-600 font-bold">{quizState.score}</span>문장을 맞혔습니다.</p>
+            <div className="flex gap-3">
+              <button onClick={startQuiz} className="flex-1 bg-gray-100 py-4 rounded-2xl font-bold flex items-center justify-center gap-2"><RotateCcw size={18}/> 다시하기</button>
+              <button onClick={() => setMode('study')} className="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold flex items-center justify-center gap-2"><List size={18}/> 목록으로</button>
             </div>
-
-            {quizState.difficultItems.length > 0 && (
-              <div className="bg-white rounded-3xl p-6 shadow-xl border border-slate-100">
-                <div className="flex items-center gap-2 mb-6 pb-4 border-b border-slate-50">
-                  <AlertCircle className="text-rose-500" size={20} />
-                  <h3 className="text-lg font-bold text-slate-800">복습이 필요한 문장 ({quizState.difficultItems.length})</h3>
-                </div>
-                <div className="space-y-4">
-                  {quizState.difficultItems.map((item) => (
-                    <div key={`result-${item.id}`} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-4">
-                      <div className="flex-grow">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-[10px] font-bold px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded-full uppercase">
-                            {item.type}
-                          </span>
-                        </div>
-                        <p className="font-semibold text-slate-800 text-sm mb-1">{item.kr}</p>
-                        <p className="text-indigo-600 font-bold text-sm">{item.en}</p>
-                      </div>
-                      <button 
-                        onClick={() => toggleFavorite(item.id)}
-                        className={`flex-shrink-0 transition-colors ${favorites[item.id] ? 'text-amber-400' : 'text-slate-300'}`}
-                      >
-                        <Star size={18} fill={favorites[item.id] ? "currentColor" : "none"} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="max-w-2xl mx-auto mt-12 pt-8 border-t border-slate-200 text-center text-slate-400 text-sm">
-        <p>© 2026 English Sprint 10-Day Challenge</p>
-        <div className="flex justify-center gap-4 mt-2 font-semibold">
+      <footer className="mt-12 text-center text-gray-400 text-sm">
+        <div className="flex justify-center gap-4 mb-2">
           <span className="flex items-center gap-1"><BookOpen size={14}/> 150 Sentences</span>
-          <span className="flex items-center gap-1"><Star size={14}/> Favorite Mode</span>
+          <span className="flex items-center gap-1"><Star size={14}/> Save Progress</span>
         </div>
+        <p>© 2026 English Sprint</p>
       </footer>
-      
-      {/* Global CSS for hidescroll */}
+
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
     </div>
   );
-};
+}
 
 export default App;
